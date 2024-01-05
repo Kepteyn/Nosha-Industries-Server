@@ -262,3 +262,40 @@
 	target.pixel_y = target.base_pixel_y + target.body_position_pixel_y_offset
 	if(target == goldilocks)
 		goldilocks = null
+
+//bunkbeds, for minimum comfort and maximum efficiency
+/obj/structure/bed/bunkbed
+	name = "bunkbed"
+	desc = "A bunkbed, for maximum efficiency of space at the expense of comfort."
+	icon_state = "bunkbed"
+	buildstackamount = 4
+	max_buckled_mobs = 1
+	var/mutable_appearance/bedframe
+
+//bunkbed frame overlay. Cloned from chair armrests.
+/obj/structure/bed/bunkbed/Initialize(mapload)
+	bedframe = GetBedframe()
+	bedframe.layer = ABOVE_MOB_LAYER
+	bedframe.plane = GAME_PLANE
+	return ..()
+
+/obj/structure/bed/bunkbed/proc/GetBedframe()
+	return mutable_appearance(icon, "[icon_state]_frame")
+
+/obj/structure/bed/bunkbed/Destroy()
+	QDEL_NULL(bedframe)
+	return ..()
+
+/obj/structure/bed/bunkbed/post_buckle_mob(mob/living/M)
+	. = ..()
+	update_bedframe()
+
+/obj/structure/bed/bunkbed/proc/update_bedframe()
+	if(has_buckled_mobs())
+		add_overlay(bedframe)
+	else
+		cut_overlay(bedframe)
+
+/obj/structure/bed/bunkbed/post_unbuckle_mob()
+	. = ..()
+	update_bedframe()
